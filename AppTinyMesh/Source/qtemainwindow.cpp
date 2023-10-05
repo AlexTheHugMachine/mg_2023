@@ -7,6 +7,9 @@
 
 using namespace std;
 
+int RX, RY, RZ;
+ID_Mesh id_m;
+
 MainWindow::MainWindow() : QMainWindow(), uiw(new Ui::Assets)
 {
     // Chargement de l'interface
@@ -35,19 +38,24 @@ void MainWindow::CreateActions()
     // Buttons
     connect(uiw->boxMesh, SIGNAL(clicked()), this, SLOT(BoxMeshExample()));
     connect(uiw->sphere, &QPushButton::clicked, [=]() {
-        OperationExample(SPHERE);
+        spawnSphere();
+        id_m = ID_SPHERE;
     });
     connect(uiw->cube, &QPushButton::clicked, [=]() {
-        OperationExample(CUBE);
+        spawnCube();
+        id_m = ID_CUBE;
     });
     connect(uiw->cone, &QPushButton::clicked, [=]() {
-        OperationExample(CONE);
+        spawnCone();
+        id_m = ID_CONE;
     });
     connect(uiw->tore, &QPushButton::clicked, [=]() {
-        OperationExample(TORE);
+        spawnTore();
+        id_m = ID_TORE;
     });
     connect(uiw->capsule, &QPushButton::clicked, [=]() {
-        OperationExample(CAPSULE);
+        spawnCapsule();
+        id_m = ID_CAPSULE;
     });
 
     connect(uiw->translation, &QPushButton::clicked, [=]() {
@@ -84,6 +92,9 @@ void MainWindow::CreateActions()
     connect(uiw->wireframe, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
     connect(uiw->radioShadingButton_1, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
     connect(uiw->radioShadingButton_2, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
+    connect(uiw->RotateXslider, SIGNAL(valueChanged(int)), this, SLOT(meshRotation()));
+    connect(uiw->RotateYslider, SIGNAL(valueChanged(int)), this, SLOT(meshRotation()));
+    connect(uiw->RotateZslider, SIGNAL(valueChanged(int)), this, SLOT(meshRotation()));
 
     // Widget edition
     connect(meshWidget, SIGNAL(_signalEditSceneLeft(const Ray&)), this, SLOT(editingSceneLeft(const Ray&)));
@@ -110,6 +121,158 @@ void MainWindow::BoxMeshExample()
     meshColor = MeshColor(boxMesh, cols, boxMesh.VertexIndexes());
     UpdateGeometry();
 }
+
+void MainWindow::spawnCube()
+{
+    Mesh implicitMesh;
+    Cube cube = Cube(Vector(0, 0, 0), Vector(3, 3, 3));
+    SDF sdf = SDF(&cube);
+
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::spawnTore()
+{
+    Mesh implicitMesh;
+    Tore tore = Tore(1, 3);
+    SDF sdf = SDF(&tore);
+
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::spawnSphere()
+{
+    Mesh implicitMesh;
+    Sphere sphere = Sphere(Vector(0, 0, 0), 2);
+    SDF sdf = SDF(&sphere);
+
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::spawnCone()
+{
+    Mesh implicitMesh;
+    Cone cone = Cone(0.2, 0.6, 5);
+    SDF sdf = SDF(&cone);
+
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::spawnCapsule()
+{
+    Mesh implicitMesh;
+    Capsule capsule = Capsule(Vector(0, -3, 0), Vector(0, 3, 0), 2);
+    SDF sdf = SDF(&capsule);
+
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::on_RotateXslider_valueChanged(int value)
+{
+    RX = value;
+}
+
+void MainWindow::on_RotateYslider_valueChanged(int value)
+{
+    RY = value;
+}
+
+void MainWindow::on_RotateZslider_valueChanged(int value)
+{
+    RZ = value;
+}
+
+void MainWindow::meshRotation()
+{
+    Mesh implicitMesh;
+    Rotation * rotationPrimitives;
+    SDF sdf;
+    Sphere * sphere_rotationX;
+    Cube * cube_rotationX;
+    Cone * cone_rotationX;
+    Tore * tore_rotationX;
+    Capsule * capsule_rotationX;
+
+    switch (id_m)
+    {
+    case ID_SPHERE:
+        sphere_rotationX = new Sphere(Vector(0, 0, 0), 2);
+        rotationPrimitives = new Rotation(sphere_rotationX, Vector(RX, RY, RZ));
+        sdf = SDF(rotationPrimitives);
+        break;
+    case ID_CUBE:
+        cube_rotationX = new Cube(Vector(0, 0, 0), Vector(3, 3, 3));
+        rotationPrimitives = new Rotation(cube_rotationX, Vector(RX, RY, RZ));
+        sdf = SDF(rotationPrimitives);
+        break;
+    case ID_CONE:
+        cone_rotationX = new Cone(0.2, 0.6, 5);
+        rotationPrimitives = new Rotation(cone_rotationX, Vector(RX, RY, RZ));
+        sdf = SDF(rotationPrimitives);
+        break;
+    case ID_TORE:
+        tore_rotationX = new Tore(1, 3);
+        rotationPrimitives = new Rotation(tore_rotationX, Vector(RX, RY, RZ));
+        sdf = SDF(rotationPrimitives);
+        break;
+    case ID_CAPSULE:
+        capsule_rotationX = new Capsule(Vector(0, -3, 0), Vector(0, 3, 0), 2);
+        rotationPrimitives = new Rotation(capsule_rotationX, Vector(RX, RY, RZ));
+        sdf = SDF(rotationPrimitives);
+        break;
+    }
+
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
 
 void MainWindow::OperationExample(Operation operation)
 {
