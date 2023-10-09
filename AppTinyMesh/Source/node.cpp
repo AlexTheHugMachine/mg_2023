@@ -258,12 +258,12 @@ double UnionSmooth::Value(const Vector& point) const
 double IntersectionSmooth::Value(const Vector& point) const
 {
     const double smoothIntersectionValue = exp(getSmoothingFactor() * getLeft()->Value(point)) + exp(getSmoothingFactor() * getRight()->Value(point));
-    return -log(fmax(0.0001, smoothIntersectionValue));
+    return log(fmax(0.0001, smoothIntersectionValue));
 }
 
 // ========== Difference smooth ==========
 double DifferenceSmooth::Value(const Vector& point) const
 {
     const double smoothDifferenceValue = exp(getSmoothingFactor() * getLeft()->Value(point)) + exp(-getSmoothingFactor() * getRight()->Value(point));
-    return -log(fmax(0.0001, smoothDifferenceValue));
+    return log(fmax(0.0001, smoothDifferenceValue));
 }

@@ -5,24 +5,6 @@
 #include "realtime.h"
 #include "meshcolor.h"
 
-enum Operation
-{
-    SPHERE = 0,
-    CUBE = 1,
-    CONE = 2,
-    TORE = 3,
-    CAPSULE = 4,
-    TRANSLATION = 5,
-    ROTATION = 6,
-    SCALE = 7,
-    UNION = 8,
-    INTERSECTION = 9,
-    DIFF = 10,
-    UNION_SMOOTH = 11,
-    INTERSECTION_SMOOTH = 12,
-    DIFF_SMOOTH = 13
-};
-
 enum ID_Mesh
 {
     ID_SPHERE = 0,
@@ -56,20 +38,33 @@ public slots:
     void editingSceneLeft(const Ray&);
     void editingSceneRight(const Ray&);
     void BoxMeshExample();
-    void OperationExample(Operation operation);
     void meshRotation();
+    void meshScale();
+    void meshTranslation();
     void spawnCube();
     void spawnTore();
     void spawnSphere();
     void spawnCone();
     void spawnCapsule();
-    void originalPrimitivesComposition();
+    void mixUnion();
+    void mixUnionSmooth();
+    void mixIntersection();
+    void mixIntersectionSmooth();
+    void mixDifference();
+    void mixDifferenceSmooth();
+    void CompositionVisage();
     void ResetCamera();
     void UpdateMaterial();
 private slots:
     void on_RotateXslider_valueChanged(int value);
     void on_RotateYslider_valueChanged(int value);
     void on_RotateZslider_valueChanged(int value);
+    void on_ScaleXBox_valueChanged(double arg1);
+    void on_ScaleYBox_valueChanged(double arg1);
+    void on_ScaleZBox_valueChanged(double arg1);
+    void on_TranslateXBox_valueChanged(double arg1);
+    void on_TranslateYBox_valueChanged(double arg1);
+    void on_TranslateZBox_valueChanged(double arg1);
 };
 
 #endif

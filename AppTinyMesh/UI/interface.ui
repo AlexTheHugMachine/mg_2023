@@ -111,8 +111,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="sphere">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>50</y>
+         <x>21</x>
+         <y>120</y>
          <width>101</width>
          <height>23</height>
         </rect>
@@ -135,8 +135,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="cube">
        <property name="geometry">
         <rect>
-         <x>140</x>
-         <y>50</y>
+         <x>141</x>
+         <y>120</y>
          <width>80</width>
          <height>23</height>
         </rect>
@@ -148,8 +148,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="cone">
        <property name="geometry">
         <rect>
-         <x>19</x>
-         <y>80</y>
+         <x>20</x>
+         <y>150</y>
          <width>101</width>
          <height>23</height>
         </rect>
@@ -161,8 +161,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="tore">
        <property name="geometry">
         <rect>
-         <x>140</x>
-         <y>80</y>
+         <x>141</x>
+         <y>150</y>
          <width>80</width>
          <height>23</height>
         </rect>
@@ -174,8 +174,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="capsule">
        <property name="geometry">
         <rect>
-         <x>19</x>
-         <y>110</y>
+         <x>20</x>
+         <y>180</y>
          <width>101</width>
          <height>23</height>
         </rect>
@@ -184,50 +184,11 @@ p, li { white-space: pre-wrap; }
         <string>Capsule</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="translation">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>110</y>
-         <width>80</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Translation</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="rotation">
-       <property name="geometry">
-        <rect>
-         <x>19</x>
-         <y>140</y>
-         <width>101</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Rotation</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="scale">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>140</y>
-         <width>80</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Scale</string>
-       </property>
-      </widget>
       <widget class="QPushButton" name="union_">
        <property name="geometry">
         <rect>
-         <x>19</x>
-         <y>170</y>
+         <x>20</x>
+         <y>290</y>
          <width>101</width>
          <height>23</height>
         </rect>
@@ -239,8 +200,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="intersection">
        <property name="geometry">
         <rect>
-         <x>19</x>
-         <y>200</y>
+         <x>20</x>
+         <y>320</y>
          <width>101</width>
          <height>23</height>
         </rect>
@@ -252,8 +213,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="difference">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>230</y>
+         <x>21</x>
+         <y>350</y>
          <width>101</width>
          <height>23</height>
         </rect>
@@ -265,9 +226,9 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="union_lisse">
        <property name="geometry">
         <rect>
-         <x>140</x>
-         <y>170</y>
-         <width>80</width>
+         <x>141</x>
+         <y>290</y>
+         <width>111</width>
          <height>23</height>
         </rect>
        </property>
@@ -278,9 +239,9 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="intersection_lisse">
        <property name="geometry">
         <rect>
-         <x>140</x>
-         <y>200</y>
-         <width>80</width>
+         <x>141</x>
+         <y>320</y>
+         <width>111</width>
          <height>23</height>
         </rect>
        </property>
@@ -291,9 +252,9 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="difference_lisse">
        <property name="geometry">
         <rect>
-         <x>140</x>
-         <y>230</y>
-         <width>80</width>
+         <x>141</x>
+         <y>350</y>
+         <width>111</width>
          <height>23</height>
         </rect>
        </property>
@@ -304,14 +265,40 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="composition">
        <property name="geometry">
         <rect>
-         <x>19</x>
-         <y>260</y>
+         <x>20</x>
+         <y>380</y>
          <width>101</width>
          <height>23</height>
         </rect>
        </property>
        <property name="text">
         <string>Composition</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="titreRotateXslider_4">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>250</y>
+         <width>171</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Opérations de composition</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="titreRotateXslider_5">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>80</y>
+         <width>191</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Choix d'objet à faire apparaître</string>
        </property>
       </widget>
      </widget>
@@ -488,7 +475,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>60</x>
-         <y>290</y>
+         <y>280</y>
          <width>331</width>
          <height>16</height>
         </rect>
@@ -507,7 +494,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>60</x>
-         <y>370</y>
+         <y>360</y>
          <width>331</width>
          <height>16</height>
         </rect>
@@ -539,7 +526,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>60</x>
-         <y>260</y>
+         <y>250</y>
          <width>121</width>
          <height>22</height>
         </rect>
@@ -552,13 +539,249 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>60</x>
-         <y>340</y>
+         <y>330</y>
          <width>121</width>
          <height>22</height>
         </rect>
        </property>
        <property name="text">
         <string>Rotation sur l'axe Z</string>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="ScaleYBox">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>470</y>
+         <width>62</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="minimum">
+        <double>0.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.250000000000000</double>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="ScaleZBox">
+       <property name="geometry">
+        <rect>
+         <x>290</x>
+         <y>470</y>
+         <width>62</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="minimum">
+        <double>0.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.250000000000000</double>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_3">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>410</y>
+         <width>41</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Scale</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_4">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>450</y>
+         <width>41</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Axe X</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_5">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>450</y>
+         <width>41</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Axe Y</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_6">
+       <property name="geometry">
+        <rect>
+         <x>300</x>
+         <y>450</y>
+         <width>41</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Axe Z</string>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="ScaleXBox">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>470</y>
+         <width>62</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="minimum">
+        <double>0.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.250000000000000</double>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_7">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>530</y>
+         <width>81</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Translation</string>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="TranslateXBox">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>590</y>
+         <width>62</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="minimum">
+        <double>-99.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.250000000000000</double>
+       </property>
+       <property name="value">
+        <double>0.000000000000000</double>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_8">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>570</y>
+         <width>41</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Axe X</string>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="TranslateYBox">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>590</y>
+         <width>62</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="minimum">
+        <double>-99.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.250000000000000</double>
+       </property>
+       <property name="value">
+        <double>0.000000000000000</double>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="TranslateZBox">
+       <property name="geometry">
+        <rect>
+         <x>290</x>
+         <y>590</y>
+         <width>62</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="minimum">
+        <double>-99.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.250000000000000</double>
+       </property>
+       <property name="value">
+        <double>0.000000000000000</double>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_9">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>570</y>
+         <width>41</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Axe Y</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_10">
+       <property name="geometry">
+        <rect>
+         <x>300</x>
+         <y>570</y>
+         <width>41</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Axe Z</string>
        </property>
       </widget>
      </widget>

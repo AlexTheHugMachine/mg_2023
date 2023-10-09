@@ -8,6 +8,7 @@
 using namespace std;
 
 int RX, RY, RZ;
+double scale_factorX, scale_factorY, scale_factorZ, TX, TY, TZ;
 ID_Mesh id_m;
 
 MainWindow::MainWindow() : QMainWindow(), uiw(new Ui::Assets)
@@ -57,37 +58,26 @@ void MainWindow::CreateActions()
         spawnCapsule();
         id_m = ID_CAPSULE;
     });
-
-    connect(uiw->translation, &QPushButton::clicked, [=]() {
-        OperationExample(TRANSLATION);
-    });
-    connect(uiw->rotation, &QPushButton::clicked, [=]() {
-        OperationExample(ROTATION);
-    });
-    connect(uiw->scale, &QPushButton::clicked, [=]() {
-        OperationExample(SCALE);
-    });
-
     connect(uiw->union_, &QPushButton::clicked, [=]() {
-        OperationExample(UNION);
+        mixUnion();
     });
     connect(uiw->intersection, &QPushButton::clicked, [=]() {
-        OperationExample(INTERSECTION);
+        mixIntersection();
     });
     connect(uiw->difference, &QPushButton::clicked, [=]() {
-        OperationExample(DIFF);
+        mixDifference();
     });
     connect(uiw->union_lisse, &QPushButton::clicked, [=]() {
-        OperationExample(UNION_SMOOTH);
+        mixUnionSmooth();
     });
     connect(uiw->intersection_lisse, &QPushButton::clicked, [=]() {
-        OperationExample(INTERSECTION_SMOOTH);
+        mixIntersectionSmooth();
     });
     connect(uiw->difference_lisse, &QPushButton::clicked, [=]() {
-        OperationExample(DIFF_SMOOTH);
+        mixDifferenceSmooth();
     });
 
-    connect(uiw->composition, SIGNAL(clicked()), this, SLOT(originalPrimitivesComposition()));
+    connect(uiw->composition, SIGNAL(clicked()), this, SLOT(CompositionVisage()));
     connect(uiw->resetcameraButton, SIGNAL(clicked()), this, SLOT(ResetCamera()));
     connect(uiw->wireframe, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
     connect(uiw->radioShadingButton_1, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
@@ -95,6 +85,12 @@ void MainWindow::CreateActions()
     connect(uiw->RotateXslider, SIGNAL(valueChanged(int)), this, SLOT(meshRotation()));
     connect(uiw->RotateYslider, SIGNAL(valueChanged(int)), this, SLOT(meshRotation()));
     connect(uiw->RotateZslider, SIGNAL(valueChanged(int)), this, SLOT(meshRotation()));
+    connect(uiw->ScaleXBox, SIGNAL(valueChanged(double)), this, SLOT(meshScale()));
+    connect(uiw->ScaleYBox, SIGNAL(valueChanged(double)), this, SLOT(meshScale()));
+    connect(uiw->ScaleZBox, SIGNAL(valueChanged(double)), this, SLOT(meshScale()));
+    connect(uiw->TranslateXBox, SIGNAL(valueChanged(double)), this, SLOT(meshTranslation()));
+    connect(uiw->TranslateYBox, SIGNAL(valueChanged(double)), this, SLOT(meshTranslation()));
+    connect(uiw->TranslateZBox, SIGNAL(valueChanged(double)), this, SLOT(meshTranslation()));
 
     // Widget edition
     connect(meshWidget, SIGNAL(_signalEditSceneLeft(const Ray&)), this, SLOT(editingSceneLeft(const Ray&)));
@@ -222,6 +218,36 @@ void MainWindow::on_RotateZslider_valueChanged(int value)
     RZ = value;
 }
 
+void MainWindow::on_ScaleXBox_valueChanged(double arg1)
+{
+    scale_factorX = arg1;
+}
+
+void MainWindow::on_ScaleYBox_valueChanged(double arg1)
+{
+    scale_factorY = arg1;
+}
+
+void MainWindow::on_ScaleZBox_valueChanged(double arg1)
+{
+    scale_factorZ = arg1;
+}
+
+void MainWindow::on_TranslateXBox_valueChanged(double arg1)
+{
+    TX = arg1;
+}
+
+void MainWindow::on_TranslateYBox_valueChanged(double arg1)
+{
+    TY = arg1;
+}
+
+void MainWindow::on_TranslateZBox_valueChanged(double arg1)
+{
+    TZ = arg1;
+}
+
 void MainWindow::meshRotation()
 {
     Mesh implicitMesh;
@@ -273,117 +299,43 @@ void MainWindow::meshRotation()
     UpdateGeometry();
 }
 
-
-void MainWindow::OperationExample(Operation operation)
+void MainWindow::meshScale()
 {
     Mesh implicitMesh;
-    SDF sdf;
-    Sphere sphere;
-    Cube cube;
-    Cone cone;
-    Tore tore;
-    Capsule capsule;
-
-    Sphere * sphere_operator1;
-    Sphere* sphere_operator2;
-    Tore * tore_operator1;
-
-    Translation * translationPrimitives;
-    Rotation * rotationPrimitives;
     Scale * scalePrimitives;
+    SDF sdf;
+    Sphere * sphere_scale;
+    Cube * cube_scale;
+    Cone * cone_scale;
+    Tore * tore_scale;
+    Capsule * capsule_scale;
 
-    Union * unionPrimitives;
-    Intersection * intersectionPrimitives;
-    Difference * differencePrimitives;
-
-    UnionSmooth * unionPrimitivesSmooth;
-    IntersectionSmooth * intersectionPrimitivesSmooth;
-    DifferenceSmooth * differencePrimitivesSmooth;
-
-
-    switch (operation)
+    switch (id_m)
     {
-
-    /* PRIMITIVES */
-    case SPHERE:
-        sphere = Sphere(Vector(0, 0, 0), 2);
-        sdf = SDF(&sphere);
-        break;
-    case CUBE:
-        cube = Cube(Vector(0, 0, 0), Vector(3, 3, 3));
-        sdf = SDF(&cube);
-        break;
-    case CONE:
-        cone = Cone(0.2, 0.6, 5);
-        sdf = SDF(&cone);
-        break;
-    case TORE:
-        tore = Tore(1, 3);
-        sdf = SDF(&tore);
-        break;
-    case CAPSULE:
-        capsule = Capsule(Vector(0, -3, 0), Vector(0, 3, 0), 2);
-        sdf = SDF(&capsule);
-        break;
-
-    /* UNARY OPERATORS */
-    case TRANSLATION:
-        sphere_operator1 = new Sphere(Vector(0, 0, 0), 2);
-        translationPrimitives = new Translation(sphere_operator1, Vector(-1, -2, 1));
-        sdf = SDF(translationPrimitives);
-        break;
-    case ROTATION:
-        tore_operator1 = new Tore(1, 3);
-        rotationPrimitives = new Rotation(tore_operator1, Vector(0, 0, 60));
-        sdf = SDF(rotationPrimitives);
-        break;
-    case SCALE:
-        sphere_operator1 = new Sphere(Vector(0, 0, 0), 2);
-        scalePrimitives = new Scale(sphere_operator1, Vector(0.4, 0.4, 0.4));
+    case ID_SPHERE:
+        sphere_scale = new Sphere(Vector(0, 0, 0), 2);
+        scalePrimitives = new Scale(sphere_scale, Vector(scale_factorX, scale_factorY, scale_factorZ));
         sdf = SDF(scalePrimitives);
         break;
-
-
-    /* BINARY OPERATORS */
-    case UNION:
-        sphere_operator1 = new Sphere(Vector(-1, 0, 0), 2);
-        sphere_operator2 = new Sphere(Vector(1, 0, 0), 2);
-        unionPrimitives = new Union(sphere_operator1, sphere_operator2);
-        sdf = SDF(unionPrimitives);
+    case ID_CUBE:
+        cube_scale = new Cube(Vector(0, 0, 0), Vector(3, 3, 3));
+        scalePrimitives = new Scale(cube_scale, Vector(scale_factorX, scale_factorY, scale_factorZ));
+        sdf = SDF(scalePrimitives);
         break;
-    case INTERSECTION:
-        sphere_operator1 = new Sphere(Vector(-1, 0, 0), 2);
-        sphere_operator2 = new Sphere(Vector(1, 0, 0), 2);
-        intersectionPrimitives = new Intersection(sphere_operator1, sphere_operator2);
-        sdf = SDF(intersectionPrimitives);
+    case ID_CONE:
+        cone_scale = new Cone(0.2, 0.6, 5);
+        scalePrimitives = new Scale(cone_scale, Vector(scale_factorX, scale_factorY, scale_factorZ));
+        sdf = SDF(scalePrimitives);
         break;
-    case DIFF:
-        sphere_operator1 = new Sphere(Vector(-1, 0, 0), 2);
-        sphere_operator2 = new Sphere(Vector(1, 0, 0), 2);
-        differencePrimitives = new Difference(sphere_operator1, sphere_operator2);
-        sdf = SDF(differencePrimitives);
+    case ID_TORE:
+        tore_scale = new Tore(1, 3);
+        scalePrimitives = new Scale(tore_scale, Vector(scale_factorX, scale_factorY, scale_factorZ));
+        sdf = SDF(scalePrimitives);
         break;
-    case UNION_SMOOTH:
-        sphere_operator1 = new Sphere(Vector(-1, 0, 0), 2);
-        sphere_operator2 = new Sphere(Vector(1, 0, 0), 2);
-        unionPrimitivesSmooth = new UnionSmooth(sphere_operator1, sphere_operator2, 4);
-        sdf = SDF(unionPrimitivesSmooth);
-        break;
-    case INTERSECTION_SMOOTH:
-        sphere_operator1 = new Sphere(Vector(-1, 0, 0), 2);
-        sphere_operator2 = new Sphere(Vector(1, 0, 0), 2);
-        intersectionPrimitivesSmooth = new IntersectionSmooth(sphere_operator1, sphere_operator2, 4);
-        sdf = SDF(intersectionPrimitivesSmooth);
-        break;
-    case DIFF_SMOOTH:
-        sphere_operator1 = new Sphere(Vector(-1, 0, 0), 2);
-        sphere_operator2 = new Sphere(Vector(1, 0, 0), 2);
-        differencePrimitivesSmooth = new DifferenceSmooth(sphere_operator1, sphere_operator2, 4);
-        sdf = SDF(differencePrimitivesSmooth);
-        break;
-
-    default:
-        cout << "Veuillez entrer un type de primitive valide!" << endl;
+    case ID_CAPSULE:
+        capsule_scale = new Capsule(Vector(0, -3, 0), Vector(0, 3, 0), 2);
+        scalePrimitives = new Scale(capsule_scale, Vector(scale_factorX, scale_factorY, scale_factorZ));
+        sdf = SDF(scalePrimitives);
         break;
     }
 
@@ -396,42 +348,432 @@ void MainWindow::OperationExample(Operation operation)
 
     meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
     UpdateGeometry();
-
 }
 
-void MainWindow::originalPrimitivesComposition()
+void MainWindow::meshTranslation()
+{
+    Mesh implicitMesh;
+    Translation * translatePrimitives;
+    SDF sdf;
+    Sphere * sphere_translate;
+    Cube * cube_translate;
+    Cone * cone_translate;
+    Tore * tore_translate;
+    Capsule * capsule_translate;
+
+    switch (id_m)
+    {
+    case ID_SPHERE:
+        sphere_translate = new Sphere(Vector(0, 0, 0), 2);
+        translatePrimitives = new Translation(sphere_translate, Vector(TX, TY, TZ));
+        sdf = SDF(translatePrimitives);
+        break;
+    case ID_CUBE:
+        cube_translate = new Cube(Vector(0, 0, 0), Vector(3, 3, 3));
+        translatePrimitives = new Translation(cube_translate, Vector(TX, TY, TZ));
+        sdf = SDF(translatePrimitives);
+        break;
+    case ID_CONE:
+        cone_translate = new Cone(0.2, 0.6, 5);
+        translatePrimitives = new Translation(cone_translate, Vector(TX, TY, TZ));
+        sdf = SDF(translatePrimitives);
+        break;
+    case ID_TORE:
+        tore_translate = new Tore(1, 3);
+        translatePrimitives = new Translation(tore_translate, Vector(TX, TY, TZ));
+        sdf = SDF(translatePrimitives);
+        break;
+    case ID_CAPSULE:
+        capsule_translate = new Capsule(Vector(0, -3, 0), Vector(0, 3, 0), 2);
+        translatePrimitives = new Translation(capsule_translate, Vector(TX, TY, TZ));
+        sdf = SDF(translatePrimitives);
+        break;
+    }
+
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::mixUnion()
+{
+    Mesh implicitMesh;
+    Union * unionPrimitives;
+    SDF sdf;
+    Sphere * sphere_Union;
+    Sphere * sphere;
+    Cube * cube;
+    Cone * cone;
+    Tore * tore;
+    Capsule * capsule;
+
+    switch (id_m)
+    {
+    case ID_SPHERE:
+        sphere = new Sphere(Vector(-1, 0, 0), 2);
+        sphere_Union = new Sphere(Vector(1, 0, 0), 2);
+        unionPrimitives = new Union(sphere, sphere_Union);
+        sdf = SDF(unionPrimitives);
+        break;
+    case ID_CUBE:
+        cube = new Cube(Vector(-1, 0, 0), Vector(3, 3, 3));
+        sphere_Union = new Sphere(Vector(1, 0, 0), 2);
+        unionPrimitives = new Union(cube, sphere_Union);
+        sdf = SDF(unionPrimitives);
+        break;
+    case ID_CONE:
+        cone = new Cone(0.2, 0.6, 4.5);
+        sphere_Union = new Sphere(Vector(1, 0, 0), 2);
+        unionPrimitives = new Union(cone, sphere_Union);
+        sdf = SDF(unionPrimitives);
+        break;
+    case ID_TORE:
+        tore = new Tore(1, 3);
+        sphere_Union = new Sphere(Vector(1, 0, 0), 2);
+        unionPrimitives = new Union(tore, sphere_Union);
+        sdf = SDF(unionPrimitives);
+        break;
+    case ID_CAPSULE:
+        capsule = new Capsule(Vector(0, -3, 0), Vector(0, 3, 0), 2);
+        sphere_Union = new Sphere(Vector(1, 0, 0), 2);
+        unionPrimitives = new Union(capsule, sphere_Union);
+        sdf = SDF(unionPrimitives);
+        break;
+    }
+
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::mixUnionSmooth()
+{
+    Mesh implicitMesh;
+    UnionSmooth * unionPrimitives;
+    SDF sdf;
+    Sphere * sphere_Union;
+    Sphere * sphere;
+    Cube * cube;
+    Cone * cone;
+    Tore * tore;
+    Capsule * capsule;
+
+    switch (id_m)
+    {
+    case ID_SPHERE:
+        sphere = new Sphere(Vector(-1, 0, 0), 2);
+        sphere_Union = new Sphere(Vector(1, 0, 0), 2);
+        unionPrimitives = new UnionSmooth(sphere, sphere_Union, 4);
+        sdf = SDF(unionPrimitives);
+        break;
+    case ID_CUBE:
+        cube = new Cube(Vector(-1, 0, 0), Vector(3, 3, 3));
+        sphere_Union = new Sphere(Vector(1, 0, 0), 2);
+        unionPrimitives = new UnionSmooth(cube, sphere_Union, 4);
+        sdf = SDF(unionPrimitives);
+        break;
+    case ID_CONE:
+        cone = new Cone(0.2, 0.6, 4.5);
+        sphere_Union = new Sphere(Vector(1, 0, 0), 2);
+        unionPrimitives = new UnionSmooth(cone, sphere_Union, 4);
+        sdf = SDF(unionPrimitives);
+        break;
+    case ID_TORE:
+        tore = new Tore(1, 3);
+        sphere_Union = new Sphere(Vector(1, 0, 0), 2);
+        unionPrimitives = new UnionSmooth(tore, sphere_Union, 4);
+        sdf = SDF(unionPrimitives);
+        break;
+    case ID_CAPSULE:
+        capsule = new Capsule(Vector(0, -3, 0), Vector(0, 3, 0), 2);
+        sphere_Union = new Sphere(Vector(1, 0, 0), 2);
+        unionPrimitives = new UnionSmooth(capsule, sphere_Union, 4);
+        sdf = SDF(unionPrimitives);
+        break;
+    }
+
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::mixIntersection()
+{
+    Mesh implicitMesh;
+    Intersection * intersectionPrimitives;
+    SDF sdf;
+    Sphere * sphere_Intersection;
+    Sphere * sphere;
+    Cube * cube;
+    Cone * cone;
+    Tore * tore;
+    Capsule * capsule;
+
+    switch (id_m)
+    {
+    case ID_SPHERE:
+        sphere = new Sphere(Vector(-1, 0, 0), 2);
+        sphere_Intersection = new Sphere(Vector(1, 0, 0), 2);
+        intersectionPrimitives = new Intersection(sphere, sphere_Intersection);
+        sdf = SDF(intersectionPrimitives);
+        break;
+    case ID_CUBE:
+        cube = new Cube(Vector(-1, 0, 0), Vector(3, 3, 3));
+        sphere_Intersection = new Sphere(Vector(1, 0, 0), 2);
+        intersectionPrimitives = new Intersection(cube, sphere_Intersection);
+        sdf = SDF(intersectionPrimitives);
+        break;
+    case ID_CONE:
+        cone = new Cone(0.2, 0.6, 4.5);
+        sphere_Intersection = new Sphere(Vector(1, 0, 0), 2);
+        intersectionPrimitives = new Intersection(cone, sphere_Intersection);
+        sdf = SDF(intersectionPrimitives);
+        break;
+    case ID_TORE:
+        tore = new Tore(1, 3);
+        sphere_Intersection = new Sphere(Vector(1, 0, 0), 2);
+        intersectionPrimitives = new Intersection(tore, sphere_Intersection);
+        sdf = SDF(intersectionPrimitives);
+        break;
+    case ID_CAPSULE:
+        capsule = new Capsule(Vector(0, -3, 0), Vector(0, 3, 0), 2);
+        sphere_Intersection = new Sphere(Vector(1, 0, 0), 2);
+        intersectionPrimitives = new Intersection(capsule, sphere_Intersection);
+        sdf = SDF(intersectionPrimitives);
+        break;
+    }
+
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::mixIntersectionSmooth()
+{
+    Mesh implicitMesh;
+    IntersectionSmooth * intersectionPrimitives;
+    SDF sdf;
+    Sphere * sphere_Intersection;
+    Sphere * sphere;
+    Cube * cube;
+    Cone * cone;
+    Tore * tore;
+    Capsule * capsule;
+
+    switch (id_m)
+    {
+    case ID_SPHERE:
+        sphere = new Sphere(Vector(-1, 0, 0), 2);
+        sphere_Intersection = new Sphere(Vector(1, 0, 0), 2);
+        intersectionPrimitives = new IntersectionSmooth(sphere, sphere_Intersection, 4);
+        sdf = SDF(intersectionPrimitives);
+        break;
+    case ID_CUBE:
+        cube = new Cube(Vector(-1, 0, 0), Vector(3, 3, 3));
+        sphere_Intersection = new Sphere(Vector(1, 0, 0), 2);
+        intersectionPrimitives = new IntersectionSmooth(cube, sphere_Intersection, 4);
+        sdf = SDF(intersectionPrimitives);
+        break;
+    case ID_CONE:
+        cone = new Cone(0.2, 0.6, 4.5);
+        sphere_Intersection = new Sphere(Vector(1, 0, 0), 2);
+        intersectionPrimitives = new IntersectionSmooth(cone, sphere_Intersection, 4);
+        sdf = SDF(intersectionPrimitives);
+        break;
+    case ID_TORE:
+        tore = new Tore(1, 3);
+        sphere_Intersection = new Sphere(Vector(1, 0, 0), 2);
+        intersectionPrimitives = new IntersectionSmooth(tore, sphere_Intersection, 4);
+        sdf = SDF(intersectionPrimitives);
+        break;
+    case ID_CAPSULE:
+        capsule = new Capsule(Vector(0, -3, 0), Vector(0, 3, 0), 2);
+        sphere_Intersection = new Sphere(Vector(1, 0, 0), 2);
+        intersectionPrimitives = new IntersectionSmooth(capsule, sphere_Intersection, 4);
+        sdf = SDF(intersectionPrimitives);
+        break;
+    }
+
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::mixDifference()
+{
+    Mesh implicitMesh;
+    Difference * differencePrimitives;
+    SDF sdf;
+    Sphere * sphere_Difference;
+    Sphere * sphere;
+    Cube * cube;
+    Cone * cone;
+    Tore * tore;
+    Capsule * capsule;
+
+    switch (id_m)
+    {
+    case ID_SPHERE:
+        sphere = new Sphere(Vector(-1, 0, 0), 2);
+        sphere_Difference = new Sphere(Vector(1, 0, 0), 2);
+        differencePrimitives = new Difference(sphere, sphere_Difference);
+        sdf = SDF(differencePrimitives);
+        break;
+    case ID_CUBE:
+        cube = new Cube(Vector(-1, 0, 0), Vector(3, 3, 3));
+        sphere_Difference = new Sphere(Vector(1, 0, 0), 2);
+        differencePrimitives = new Difference(cube, sphere_Difference);
+        sdf = SDF(differencePrimitives);
+        break;
+    case ID_CONE:
+        cone = new Cone(0.2, 0.6, 4.5);
+        sphere_Difference = new Sphere(Vector(1, 0, 0), 2);
+        differencePrimitives = new Difference(cone, sphere_Difference);
+        sdf = SDF(differencePrimitives);
+        break;
+    case ID_TORE:
+        tore = new Tore(1, 3);
+        sphere_Difference = new Sphere(Vector(1.5, 0, 0), 2);
+        differencePrimitives = new Difference(tore, sphere_Difference);
+        sdf = SDF(differencePrimitives);
+        break;
+    case ID_CAPSULE:
+        capsule = new Capsule(Vector(0, -3, 0), Vector(0, 3, 0), 2);
+        sphere_Difference = new Sphere(Vector(1, 0, 0), 2);
+        differencePrimitives = new Difference(capsule, sphere_Difference);
+        sdf = SDF(differencePrimitives);
+        break;
+    }
+
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::mixDifferenceSmooth()
+{
+    Mesh implicitMesh;
+    DifferenceSmooth * differencePrimitives;
+    SDF sdf;
+    Sphere * sphere_Difference;
+    Sphere * sphere;
+    Cube * cube;
+    Cone * cone;
+    Tore * tore;
+    Capsule * capsule;
+
+    switch (id_m)
+    {
+    case ID_SPHERE:
+        sphere = new Sphere(Vector(-1, 0, 0), 2);
+        sphere_Difference = new Sphere(Vector(1, 0, 0), 2);
+        differencePrimitives = new DifferenceSmooth(sphere, sphere_Difference, 4);
+        sdf = SDF(differencePrimitives);
+        break;
+    case ID_CUBE:
+        cube = new Cube(Vector(-1, 0, 0), Vector(3, 3, 3));
+        sphere_Difference = new Sphere(Vector(1, 0, 0), 2);
+        differencePrimitives = new DifferenceSmooth(cube, sphere_Difference, 4);
+        sdf = SDF(differencePrimitives);
+        break;
+    case ID_CONE:
+        cone = new Cone(0.2, 0.6, 4.5);
+        sphere_Difference = new Sphere(Vector(1, 0, 0), 2);
+        differencePrimitives = new DifferenceSmooth(cone, sphere_Difference, 4);
+        sdf = SDF(differencePrimitives);
+        break;
+    case ID_TORE:
+        tore = new Tore(1, 3);
+        sphere_Difference = new Sphere(Vector(1.5, 0, 0), 2);
+        differencePrimitives = new DifferenceSmooth(tore, sphere_Difference, 4);
+        sdf = SDF(differencePrimitives);
+        break;
+    case ID_CAPSULE:
+        capsule = new Capsule(Vector(0, -3, 0), Vector(0, 3, 0), 2);
+        sphere_Difference = new Sphere(Vector(1, 0, 0), 2);
+        differencePrimitives = new DifferenceSmooth(capsule, sphere_Difference, 4);
+        sdf = SDF(differencePrimitives);
+        break;
+    }
+
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::CompositionVisage()
 {
     Mesh implicitMesh;
 
-    const double smoothFactor = 2;
+    const double smoothFactor = 4;
 
-    Tore tore1(0.5, 2);
-    Tore tore2(0.5, 2);
-    Tore tore3(0.5, 2);
-    Tore tore4(0.5, 2);
-    Tore tore5(0.5, 2);
-    Tore tore6(0.5, 2);
+    Tore * toreBouche = new Tore(1, 3);
+    Sphere * sphereBouche = new Sphere(Vector(1, 0, 0), 2);
+    IntersectionSmooth * interBouche = new IntersectionSmooth(toreBouche, sphereBouche, smoothFactor);
+    Translation * translateBouche = new Translation(interBouche, Vector(0, -1, 0));
 
-    Rotation * rotation1 = new Rotation(&tore2, Vector(0, 0, 90));
-    Translation * translation1 = new Translation(rotation1, Vector(2, 2, 0));
-    UnionSmooth * unionSmooth1 = new UnionSmooth(&tore1, translation1, smoothFactor);
+    Cone * cou = new Cone(0.2, 0.6, 4.5);
+    Sphere * tete = new Sphere(Vector(1, 0, 0), 2);
+    Sphere * eye1 = new Sphere(Vector(4, 1.5, 1.5), 2);
+    Sphere * eye1b = new Sphere(Vector(15, 4.1, 4.1), 2);
+    Scale * scaleEye1 = new Scale(eye1, Vector(0.5, 0.5, 0.5));
+    Scale * scaleEye1b = new Scale(eye1b, Vector(0.2, 0.2, 0.2));
+    Sphere * eye2 = new Sphere(Vector(4, 1.5, -1.5), 2);
+    Sphere * eye2b = new Sphere(Vector(15, 4.1, -4.1), 2);
+    Scale * scaleEye2 = new Scale(eye2, Vector(0.5, 0.5, 0.5));
+    Scale * scaleEye2b = new Scale(eye2b, Vector(0.2, 0.2, 0.2));
 
-    Rotation* rotation2 = new Rotation(&tore3, Vector(0, 0, 90));
-    Translation* translation2 = new Translation(rotation2, Vector(-2, 2, 0));
-    UnionSmooth* unionSmooth2 = new UnionSmooth(unionSmooth1, translation2, smoothFactor);
+    UnionSmooth * unionCouTete = new UnionSmooth(cou, tete, smoothFactor);
+    UnionSmooth * unionVisageEye1 = new UnionSmooth(unionCouTete, scaleEye1, smoothFactor);
+    UnionSmooth * unionVisageEye2 = new UnionSmooth(unionVisageEye1, scaleEye2, smoothFactor);
+    DifferenceSmooth * diffeye1visage = new DifferenceSmooth(unionVisageEye2, scaleEye1b, smoothFactor);
+    DifferenceSmooth * diffeye2visage = new DifferenceSmooth(diffeye1visage, scaleEye2b, smoothFactor);
+    DifferenceSmooth * visageComplet = new DifferenceSmooth(diffeye2visage, translateBouche, smoothFactor);
+    Rotation * rotationFinale = new Rotation(visageComplet, Vector(-90, 90, 0));
 
-    Translation* translation3 = new Translation(&tore4, Vector(0, 4, 0));
-    UnionSmooth* unionSmooth3 = new UnionSmooth(unionSmooth2, translation3, smoothFactor);
-
-    Rotation* rotation3 = new Rotation(&tore5, Vector(0, 90, 90));
-    Translation* translation4 = new Translation(rotation3, Vector(0, 2, 2));
-    UnionSmooth* unionSmooth4 = new UnionSmooth(unionSmooth3, translation4, smoothFactor);
-
-    Rotation* rotation4 = new Rotation(&tore6, Vector(0, 90, 90));
-    Translation* translation5 = new Translation(rotation4, Vector(0, 2, -2));
-    UnionSmooth* unionSmooth5 = new UnionSmooth(unionSmooth4, translation5, smoothFactor);
-
-    SDF sdf(unionSmooth5);
+    SDF sdf(rotationFinale);
     sdf.Polygonize(50, implicitMesh, Box(5.0));
 
     std::vector<Color> cols;
