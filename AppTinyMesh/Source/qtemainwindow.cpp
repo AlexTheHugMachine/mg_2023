@@ -98,6 +98,7 @@ void MainWindow::CreateActions()
     // Widget edition
     connect(meshWidget, SIGNAL(_signalEditSceneLeft(const Ray&)), this, SLOT(editingSceneLeft(const Ray&)));
     connect(meshWidget, SIGNAL(_signalEditSceneRight(const Ray&)), this, SLOT(editingSceneRight(const Ray&)));
+    connect(meshWidget, SIGNAL(_signalErosion(const Ray&)), this, SLOT(editingErosion(const Ray&)));
 }
 
 void MainWindow::editingSceneLeft(const Ray&)
@@ -106,6 +107,11 @@ void MainWindow::editingSceneLeft(const Ray&)
 
 void MainWindow::editingSceneRight(const Ray&)
 {
+}
+
+void MainWindow::editingErosion(const Ray &)
+{
+    std::cout << "hello";
 }
 
 void MainWindow::BoxMeshExample()

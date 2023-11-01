@@ -38,6 +38,7 @@ public:
 public slots:
     void editingSceneLeft(const Ray&);
     void editingSceneRight(const Ray&);
+    void editingErosion(const Ray&);
     void BoxMeshExample();
     void meshRotation();
     void meshScale();
