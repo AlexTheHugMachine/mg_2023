@@ -2,26 +2,20 @@
 #define BEZIER_H
 
 #include <vector>
-#include <iostream>
-
-#include "mesh.h"
-
-using namespace std;
+#include <mathematics.h>
 
 class Bezier {
-
 public:
-    Bezier(unsigned int numRows, unsigned int numCols);
+    Bezier(int degree, const std::vector<std::vector<Vector>>& controlPoints);
 
-    vector<vector<Vector>> getControlPoints() { return controlPoints; };
-    void setControlPoints(vector<vector<Vector>> _controlPoints) {
-        controlPoints = _controlPoints;
-    };
-
-    void setControlPoint(unsigned int row, unsigned int col, const Vector& point);
+    std::vector<std::vector<Vector>> Polygonize(int numSegments) const;
 
 private:
-    vector<vector<Vector>> controlPoints;
+    int degree_;
+    std::vector<std::vector<Vector>> controlPoints_;
+
+    float Bernstein(int n, int i, float t) const;
+    int Factorial(int n) const;
 };
 
 #endif // BEZIER_H

@@ -185,6 +185,7 @@ signals:
   void _signalMouseRelease();
   void _signalEditSceneLeft(const Ray&);
   void _signalEditSceneRight(const Ray&);
+  void _signalErosion(const Ray&);
 
 public slots:
   virtual void mousePressEvent(QMouseEvent*);

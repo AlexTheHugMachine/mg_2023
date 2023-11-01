@@ -24,7 +24,7 @@ public:
     Signed() {};
     ~Signed() {};
 
-    virtual bool Intersect(const Ray& ray, double& distance) const = 0;
+    virtual bool Intersect(const Ray& ray, double& t) const = 0;
 };
 
 

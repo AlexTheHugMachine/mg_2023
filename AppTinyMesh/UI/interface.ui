@@ -272,7 +272,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Composition</string>
+        <string>Visage</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="titreRotateXslider_4">

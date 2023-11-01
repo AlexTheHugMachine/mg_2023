@@ -76,8 +76,11 @@ void MainWindow::CreateActions()
     connect(uiw->difference_lisse, &QPushButton::clicked, [=]() {
         mixDifferenceSmooth();
     });
+    connect(uiw->composition, &QPushButton::clicked, [=]() {
+        CompositionVisage();
+        //id_m = ID_VISAGE;
+    });
 
-    connect(uiw->composition, SIGNAL(clicked()), this, SLOT(CompositionVisage()));
     connect(uiw->resetcameraButton, SIGNAL(clicked()), this, SLOT(ResetCamera()));
     connect(uiw->wireframe, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
     connect(uiw->radioShadingButton_1, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
@@ -754,6 +757,11 @@ void MainWindow::CompositionVisage()
     IntersectionSmooth * interBouche = new IntersectionSmooth(toreBouche, sphereBouche, smoothFactor);
     Translation * translateBouche = new Translation(interBouche, Vector(0, -1, 0));
 
+    Cone * coneNez = new Cone(0.2, 0.6, 4.5);
+    Sphere * sphereNez = new Sphere(Vector(1, 0, 0), 2);
+    IntersectionSmooth * interNez = new IntersectionSmooth(coneNez, sphereNez, smoothFactor);
+    Translation * translationNez = new Translation(interNez, Vector(3, 1, 0));
+
     Cone * cou = new Cone(0.2, 0.6, 4.5);
     Sphere * tete = new Sphere(Vector(1, 0, 0), 2);
     Sphere * eye1 = new Sphere(Vector(4, 1.5, 1.5), 2);
@@ -766,7 +774,8 @@ void MainWindow::CompositionVisage()
     Scale * scaleEye2b = new Scale(eye2b, Vector(0.2, 0.2, 0.2));
 
     UnionSmooth * unionCouTete = new UnionSmooth(cou, tete, smoothFactor);
-    UnionSmooth * unionVisageEye1 = new UnionSmooth(unionCouTete, scaleEye1, smoothFactor);
+    UnionSmooth * unionVisageNez = new UnionSmooth(unionCouTete, translationNez, smoothFactor);
+    UnionSmooth * unionVisageEye1 = new UnionSmooth(unionVisageNez, scaleEye1, smoothFactor);
     UnionSmooth * unionVisageEye2 = new UnionSmooth(unionVisageEye1, scaleEye2, smoothFactor);
     DifferenceSmooth * diffeye1visage = new DifferenceSmooth(unionVisageEye2, scaleEye1b, smoothFactor);
     DifferenceSmooth * diffeye2visage = new DifferenceSmooth(diffeye1visage, scaleEye2b, smoothFactor);
