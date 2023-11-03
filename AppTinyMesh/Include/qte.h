@@ -4,6 +4,8 @@
 #include <QtWidgets/qmainwindow.h>
 #include "realtime.h"
 #include "meshcolor.h"
+#include "signed.h"
+#include "node.h"
 
 enum ID_Mesh
 {
@@ -33,6 +35,9 @@ public:
     ~MainWindow();
     void CreateActions();
     void UpdateGeometry();
+
+    Signed sdf;
+    Node* currentNode;
 
 public slots:
     void editingSceneLeft(const Ray&);

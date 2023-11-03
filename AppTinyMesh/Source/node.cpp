@@ -1,11 +1,13 @@
 #include "node.h"
 
+using namespace std;
+
 /* ------------------------------------------- PRIMITIVES -------------------------------------------- */
 
 // ========== Sph�re ==========
 double Sphere::Value(const Vector& point) const
 {
-    return Norm(point - getCenter()) - getRadius();
+    return Norm(point - center) - radius;
     /*
     point - center => vecteur qui pointe du centre de la sph�re vers le point.
     Norm(point - center) => distance euclidienne entre le centre de la sph�re et le point.
@@ -16,14 +18,14 @@ double Sphere::Value(const Vector& point) const
 // ========== Cube ==========
 double Cube::Value(const Vector& point) const
 {
-    const double x = fmax((point[0]) - getCenter()[0] - Norm(Vector(getSides()[0] / 2, 0, 0)),
-                          getCenter()[0] - point[0] - Norm(Vector(getSides()[0] / 2, 0, 0)));
+    const double x = fmax((point[0]) - center[0] - Norm(Vector(sides[0] / 2, 0, 0)),
+                          center[0] - point[0] - Norm(Vector(sides[0] / 2, 0, 0)));
 
-    const double y = fmax((point[1]) - getCenter()[1] - Norm(Vector(getSides()[1] / 2, 0, 0)),
-                          getCenter()[1] - point[1] - Norm(Vector(getSides()[1] / 2, 0, 0)));
+    const double y = fmax((point[1]) - center[1] - Norm(Vector(sides[1] / 2, 0, 0)),
+                          center[1] - point[1] - Norm(Vector(sides[1] / 2, 0, 0)));
 
-    const double z = fmax((point[2]) - getCenter()[2] - Norm(Vector(getSides()[2] / 2, 0, 0)),
-                          getCenter()[2] - point[2] - Norm(Vector(getSides()[2] / 2, 0, 0)));
+    const double z = fmax((point[2]) - center[2] - Norm(Vector(sides[2] / 2, 0, 0)),
+                          center[2] - point[2] - Norm(Vector(sides[2] / 2, 0, 0)));
 
     return fmax(fmax(x, y), z);
     /*
@@ -43,7 +45,7 @@ double Cube::Value(const Vector& point) const
 double Cone::Value(const Vector& point) const
 {
     const double q = Norm(Vector(point[0], 0, point[2]));
-    return fmax(Vector(getCos(), getSin(), 0) * Vector(q, point[1], 0), -getHeight() - point[1]);
+    return fmax(Vector(cos, sin, 0) * Vector(q, point[1], 0), -height - point[1]);
 
     /*
     Norm(Vector(point[0], 0, point[2])) => distance du point � l'axe central du c�ne (z).
@@ -56,32 +58,32 @@ double Cone::Value(const Vector& point) const
 // ========== Tore ==========
 double Tore::Value(const Vector& point) const
 {
-    const double x = Norm(Vector(point[0], 0, point[2])) - getLargeCircleRadius();
-    return Norm(Vector(x, point[1], 0)) - getSmallCircleRadius();
+    const double x = Norm(Vector(point[0], 0, point[2])) - largeCircleRadius;
+    return Norm(Vector(x, point[1], 0)) - smallCircleRadius;
 
     /*
     Vector(point[0], 0, point[2]) => projete le point sur le plan xz.
     Norm(Vector(point[0], 0, point[2])) => distance du point � l'origine.
-    Norm(Vector(point[0], 0, point[2])) - getLargeCircleRadius() => distance du point au grand cercle.
+    Norm(Vector(point[0], 0, point[2])) - largeCircleRadius => distance du point au grand cercle.
     (Vector(x, point[1], 0) => vecteur du point au centre du tore.
-    Norm(Vector(x, point[1], 0)) - getSmallCircleRadius() => distance du point au petit cercle.
+    Norm(Vector(x, point[1], 0)) - smallCircleRadius => distance du point au petit cercle.
     */
 }
 
 // ========== Capsule ==========
 double Capsule::Value(const Vector& point) const
 {
-    const Vector capsuleDirection = getSecondExtremity() - getFirstExtremity();
-    const Vector vectorFromExtremity1 = point - getFirstExtremity();
+    const Vector capsuleDirection = extremity2 - extremity1;
+    const Vector vectorFromExtremity1 = point - extremity1;
 
     double parameter = (capsuleDirection * vectorFromExtremity1) / (capsuleDirection * capsuleDirection);
 
     if (parameter < 0) { parameter = 0; }
     if (parameter > 1) { parameter = 1; }
 
-    const Vector closestPoint = getFirstExtremity() + parameter * capsuleDirection;
+    const Vector closestPoint = extremity1 + parameter * capsuleDirection;
 
-    return Norm(point - closestPoint) - getRadius();
+    return Norm(point - closestPoint) - radius;
     /*
     extremity2 - extremity1 => direction de la capsule.
     point - extremity1 => vecteur de la premi�re extr�mit� au point.
@@ -97,13 +99,36 @@ double Capsule::Value(const Vector& point) const
     */
 }
 
+double Cylinder::Value(const Vector& point) const
+{
+    Vector projectedPoint(point[0], 0, point[2]);
+    double distanceToCenter = Norm(projectedPoint - center);
+
+    if (distanceToCenter > radius && (point[1] > height / 2 || point[1] < -height / 2)) {
+        return fmax(distanceToCenter - radius, fabs(point[1]) - height / 2);
+    }
+    else if (distanceToCenter <= radius && (point[1] > height / 2 || point[1] < -height / 2)) {
+        return fmax(radius - distanceToCenter, fabs(point[1]) - height / 2);
+    }
+    else {
+        return fmax(distanceToCenter - radius, fabs(point[1]) - height / 2);
+    }
+    /*
+    Vector projectedPoint(point[0], 0, point[2]) => projection du point sur le plan xz.
+    Norm(projectedPoint - center) => distance du point projet� au centre du cercle.
+    (distanceToCenter > radius && (point[1] > height / 2 || point[1] < -height / 2)) => teste si le point projet� est � l'ext�rieur du cercle et � l'ext�rieur de la hauteur du cylindre.
+    (distanceToCenter <= radius && (point[1] > height / 2 || point[1] < -height / 2)) => teste si le point projet� est � l'int�rieur du cercle mais � l'ext�rieur de la hauteur du cylindre.
+    else => teste si le point est � l'int�rieur du cylindre.
+    */
+}
+
 
 /* ---------------------------------------- TRANSFORMATIONS ----------------------------------------- */
 
 // ========== Translation ==========
 double Translation::Value(const Vector& point) const
 {
-    return getNode()->Value(point - getTransformation());
+    return node->Value(point - transformation);
     /*
     point - transformation : translation inverse du point -> ram�ne le point depuis sa position actuelle (apr�s la translation) vers sa position d'origine (avant la translation).
     Value => positif si le point est � l'ext�rieur, n�gatif s'il est � l'int�rieur.
@@ -117,25 +142,25 @@ double Rotation::Value(const Vector& point) const
     double co;
     double si;
 
-    if (getTransformation()[0] != 0) {
-        co = cos(Math::DegreeToRadian(getTransformation()[0]));
-        si = sin(Math::DegreeToRadian(getTransformation()[0]));
+    if (transformation[0] != 0) {
+        co = cos(Math::DegreeToRadian(transformation[0]));
+        si = sin(Math::DegreeToRadian(transformation[0]));
         rot = Vector(rot[0], co * rot[1] - si * rot[2], si * rot[1] + co * rot[2]);
     }
 
-    if (getTransformation()[1] != 0) {
-        co = cos(Math::DegreeToRadian(getTransformation()[1]));
-        si = sin(Math::DegreeToRadian(getTransformation()[1]));
+    if (transformation[1] != 0) {
+        co = cos(Math::DegreeToRadian(transformation[1]));
+        si = sin(Math::DegreeToRadian(transformation[1]));
         rot = Vector(co * rot[0] + si * rot[2], rot[1], -si * rot[0] + co * rot[2]);
     }
 
-    if (getTransformation()[2] != 0) {
-        co = cos(Math::DegreeToRadian(getTransformation()[2]));
-        si = sin(Math::DegreeToRadian(getTransformation()[2]));
+    if (transformation[2] != 0) {
+        co = cos(Math::DegreeToRadian(transformation[2]));
+        si = sin(Math::DegreeToRadian(transformation[2]));
         rot = Vector(co * rot[0] - si * rot[1], si * rot[0] + co * rot[1], rot[2]);
     }
 
-    return getNode()->Value(rot);
+    return node->Value(rot);
     /*
     rot => position du point apr�s avoir subi la rotation.
     if => traite chaque composante de la rotation (rotation autour des axes X, Y et Z).
@@ -152,8 +177,8 @@ double Rotation::Value(const Vector& point) const
 double Scale::Value(const Vector& point) const
 {
     Vector scaledPoint = point;
-    scaledPoint *= getTransformation().Inverse();
-    return getNode()->Value(scaledPoint);
+    scaledPoint *= transformation.Inverse();
+    return node->Value(scaledPoint);
     /*
     transformation.Inverse() : inversion pour annuler l'effet de la mise � l'�chelle (si transformation = 2, l'inverse serait de 0.5 pour revenir � la taille d'origine).
     scaledPoint *= => r�duit ou agrandit chaque composant du point selon la mise � l'�chelle inverse.
@@ -172,10 +197,10 @@ double Scale::Value(const Vector& point) const
 // ========== Union ==========
 double Union::Value(const Vector& point) const
 {
-    return fmin(getLeft()->Value(point), getRight()->Value(point));
+    return fmin(left->Value(point), right->Value(point));
     /*
-    left->Value(point): distance sign�e entre le point et le noeud de gauche.
-    right->Value(point): distance sign�e entre le point et le noeud de droite.
+    left->Value(point) : distance sign�e entre le point et le noeud de gauche.
+    right->Value(point) : distance sign�e entre le point et le noeud de droite.
     fmin => plus petite distance entre le point et les deux objets, indique � quelle distance le point est du c�t� ext�rieur de l'union des deux objets.
     */
 }
@@ -183,54 +208,21 @@ double Union::Value(const Vector& point) const
 // ========== Intersection ==========
 double Intersection::Value(const Vector& point) const
 {
-    return fmax(getLeft()->Value(point), getRight()->Value(point));
+    return fmax(left->Value(point), right->Value(point));
     /*
-    left->Value(point): distance sign�e entre le point et le noeud de gauche.
-    right->Value(point): distance sign�e entre le point et le noeud de droite.
+    left->Value(point) : distance sign�e entre le point et le noeud de gauche.
+    right->Value(point) : distance sign�e entre le point et le noeud de droite.
     fmax => plus grande distance entre le point et les deux objets, indique � quelle distance le point est du c�t� ext�rieur de l'intersection des deux objets.
     */
 }
 
-bool Intersection::Intersect(const Ray& ray, double& distance) const
-{
-    // Param�tres de l'algorithme de Sphere Tracing.
-    constexpr double epsilon = 0.001; // Tol�rance pour la d�tection de collision.
-    constexpr int maxIterations = 100; // Nombre maximal d'it�rations.
-
-    double t = 0.0; // Param�tre de distance le long du rayon initialis� � 0.
-
-    for (unsigned int i = 0; i < maxIterations; ++i)
-    {
-        const Vector currentPos = ray.Origin() + t * ray.Direction(); // Position actuelle le long du rayon.
-
-        const double currentValue = Value(currentPos); // Valeur de la surface implicite en ce point.
-
-        // V�rifie si le point est suffisamment proche de la surface implicite.
-        if (fabs(currentValue) < epsilon)
-        {
-            distance = t;
-            return true; // Intersection trouv�e.
-        }
-
-        // Avance le long du rayon en fonction de la valeur de la surface implicite.
-        t += currentValue;
-
-        // Si t devient n�gatif, le rayon est sorti de l'objet.
-        if (t < 0.0)
-            return false;
-    }
-
-    return false; // Nombre maximal d'it�rations sans intersection => pas d'intersection.
-}
-
-
 // ========== Difference ==========
 double Difference::Value(const Vector& point) const
 {
-    return fmax(getLeft()->Value(point), -getRight()->Value(point));
+    return fmax(left->Value(point), -right->Value(point));
     /*
-    left->Value(point): distance sign�e entre le point et le noeud de gauche.
-    -right->Value(point): oppos�e de la distance sign�e entre le point et le noeud de droite.
+    left->Value(point) : distance sign�e entre le point et le noeud de gauche.
+    -right->Value(point) : oppos�e de la distance sign�e entre le point et le noeud de droite.
     fmax => plus grande distance entre le point et les deux objets, indique � quelle distance le point est du c�t� ext�rieur de l'intersection des deux objets.
     */
 }
@@ -241,29 +233,43 @@ double Difference::Value(const Vector& point) const
 // -----------------------
 
 // ========== Union smooth ==========
-double UnionSmooth::Value(const Vector& point) const
-{
-    const double smoothUnionValue = exp(-getSmoothingFactor() * getLeft()->Value(point)) + exp(-getSmoothingFactor() * getRight()->Value(point));
-    return -log(fmax(0.0001, smoothUnionValue));
+double UnionSmooth::Value(const Vector& point) const {
+    const double leftValue = left->Value(point);
+    const double rightValue = right->Value(point);
+
+    const double h = max(smoothingFactor - abs(leftValue - rightValue), 0.0) / smoothingFactor;
+
+    const double gFactor = (1.0 / 6.0) * smoothingFactor * pow(h, 3.0);
+
+    return min(leftValue, rightValue) - gFactor;
     /*
-    smoothingfactor => facteur de lissage, utilis� pour d�terminer � quel point l'union des deux objets est lisse. Plus le facteur de lissage est �lev�, plus l'union sera lisse.
-    exp => lisser les transitions entre les deux objets. Plus la valeur des objets est n�gative, plus l'exponentielle sera proche de z�ro.
-    fmax =>  s'assure que smoothUnionValue n'est jamais �gal � z�ro ou n�gatif, car cela provoquerait une division par z�ro dans le calcul du logarithme.
-    -log => obtient une valeur �lev�e lorsque smoothUnionValue est proche de z�ro et une valeur basse lorsque smoothUnionValue est grand.
-    -log(fmax(0.0001, smoothUnionValue)) => calcule une valeur qui est �lev�e pr�s de la surface de l'objet (lorsque smoothUnionValue est proche de z�ro) et qui diminue progressivement lorsque l'on s'�loigne de la surface de l'objet.
+    leftValue et rightValue : valeurs pour les noeuds gauche et droite.
+    h : permet un lissage progressif.
+    gFactor : facteur g(a, b) du cours.
     */
 }
 
+
 // ========== Intersection smooth ==========
-double IntersectionSmooth::Value(const Vector& point) const
-{
-    const double smoothIntersectionValue = exp(getSmoothingFactor() * getLeft()->Value(point)) + exp(getSmoothingFactor() * getRight()->Value(point));
-    return log(fmax(0.0001, smoothIntersectionValue));
+double IntersectionSmooth::Value(const Vector& point) const {
+    const double leftValue = left->Value(point);
+    const double rightValue = right->Value(point);
+
+    const double h = max(smoothingFactor - abs(leftValue - rightValue), 0.0) / smoothingFactor;
+
+    const double gFactor = (1.0 / 6.0) * smoothingFactor * pow(h, 3.0);
+
+    return max(leftValue, rightValue) - gFactor;
 }
 
 // ========== Difference smooth ==========
-double DifferenceSmooth::Value(const Vector& point) const
-{
-    const double smoothDifferenceValue = exp(getSmoothingFactor() * getLeft()->Value(point)) + exp(-getSmoothingFactor() * getRight()->Value(point));
-    return log(fmax(0.0001, smoothDifferenceValue));
+double DifferenceSmooth::Value(const Vector& point) const {
+    const double leftValue = left->Value(point);
+    const double rightValue = -right->Value(point);
+
+    const double h = max(smoothingFactor - abs(leftValue - rightValue), 0.0) / smoothingFactor;
+
+    const double gFactor = (1.0 / 6.0) * smoothingFactor * pow(h, 3.0);
+
+    return max(leftValue, rightValue) + gFactor;
 }

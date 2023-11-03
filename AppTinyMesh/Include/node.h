@@ -17,16 +17,6 @@ public:
     virtual double Value(const Vector& point) const = 0;
 };
 
-// ========== Signed ==========
-class Signed
-{
-public:
-    Signed() {};
-    ~Signed() {};
-
-    virtual bool Intersect(const Ray& ray, double& t) const = 0;
-};
-
 
 /* ------------------------------------------- PRIMITIVES -------------------------------------------- */
 
@@ -38,12 +28,9 @@ public:
     Sphere(const Vector& _center, const double& _radius) : center(_center), radius(_radius) {};
     ~Sphere() {};
 
-    Vector getCenter() const { return center; }
-    double getRadius() const { return radius; }
-
     double Value(const Vector& point) const override;
 
-private:
+protected:
     Vector center;
     double radius;
 };
@@ -57,12 +44,9 @@ public:
     Cube(const Vector& _center, const Vector& _sides) : center(_center), sides(_sides) {};
     ~Cube() {};
 
-    Vector getCenter() const { return center; }
-    Vector getSides() const { return sides; }
-
     double Value(const Vector& point) const override;
 
-private:
+protected:
     Vector center;
     Vector sides;
 };
@@ -75,13 +59,9 @@ public:
     Cone(const double& _sin, const double& _cos, const double& _height) : sin(_sin), cos(_cos), height(_height) {};
     ~Cone() {};
 
-    double getSin() const { return sin; }
-    double getCos() const { return cos; }
-    double getHeight() const { return height; }
-
     double Value(const Vector& point) const override;
 
-private:
+protected:
     double sin;
     double cos;
     double height;
@@ -95,12 +75,9 @@ public:
     Tore(const double& _smallCircleRadius, const double& _largeCircleRadius) : smallCircleRadius(_smallCircleRadius), largeCircleRadius(_largeCircleRadius) {};
     ~Tore() {};
 
-    double getSmallCircleRadius() const { return smallCircleRadius; }
-    double getLargeCircleRadius() const { return largeCircleRadius; }
-
     double Value(const Vector& point) const override;
 
-private:
+protected:
     double smallCircleRadius;
     double largeCircleRadius;
 };
@@ -113,16 +90,29 @@ public:
     Capsule(const Vector& _extremity1, const Vector& _extremity2, const double& _radius) : extremity1(_extremity1), extremity2(_extremity2), radius(_radius) {};
     ~Capsule() {};
 
-    Vector getFirstExtremity() const { return extremity1; }
-    Vector getSecondExtremity() const { return extremity2; }
-    double getRadius() const { return radius; }
-
     double Value(const Vector& point) const override;
 
-private:
+protected:
     Vector extremity1;
     Vector extremity2;
     double radius;
+};
+
+// ========== Cylinder ==========
+class Cylinder : public Node
+{
+public:
+    Cylinder() : center(Vector(0, 0, 0)), radius(0.0), height(0.0) {};
+    Cylinder(const Vector& _center, const double& _radius, const double& _height)
+        : center(_center), radius(_radius), height(_height) {};
+    ~Cylinder() {};
+
+    double Value(const Vector& point) const override;
+
+protected:
+    Vector center;
+    double radius;
+    double height;
 };
 
 
@@ -139,12 +129,9 @@ public:
         delete node;
     };
 
-    Node* getNode() const { return node; }
-    Vector getTransformation() const { return transformation; }
-
     double Value(const Vector& point) const override;
 
-private:
+protected:
     Node* node;
     Vector transformation;
 };
@@ -160,12 +147,9 @@ public:
         delete node;
     };
 
-    Node* getNode() const { return node; }
-    Vector getTransformation() const { return transformation; }
-
     double Value(const Vector& point) const override;
 
-private:
+protected:
     Node* node;
     Vector transformation;
 };
@@ -181,12 +165,9 @@ public:
         delete node;
     };
 
-    Vector getTransformation() const { return transformation; }
-    Node* getNode() const {	return node; }
-
     double Value(const Vector& point) const override;
 
-private:
+protected:
     Node* node;
     Vector transformation;
 };
@@ -209,18 +190,15 @@ public:
         delete right;
     }
 
-    Node* getLeft() const { return left; }
-    Node* getRight() const { return right; }
-
     double Value(const Vector& point) const override;
 
-private:
+protected:
     Node* left;
     Node* right;
 };
 
 // ========== Intersection ==========
-class Intersection : public Node, public Signed
+class Intersection : public Node
 {
 public:
     Intersection() : left(nullptr), right(nullptr) {};
@@ -230,13 +208,9 @@ public:
         delete right;
     }
 
-    Node* getLeft() const { return left; }
-    Node* getRight() const { return right; }
-
     double Value(const Vector& point) const override;
-    bool Intersect(const Ray& ray, double& distance) const override;
 
-private:
+protected:
     Node* left;
     Node* right;
 };
@@ -252,12 +226,9 @@ public:
         delete right;
     }
 
-    Node* getLeft() const { return left; }
-    Node* getRight() const { return right; }
-
     double Value(const Vector& point) const override;
 
-private:
+protected:
     Node* left;
     Node* right;
 };
@@ -277,13 +248,9 @@ public:
         delete right;
     }
 
-    Node* getLeft() const { return left; }
-    Node* getRight() const { return right; }
-    double getSmoothingFactor() const { return smoothingFactor; }
-
     double Value(const Vector& point) const override;
 
-private:
+protected:
     Node* left;
     Node* right;
     double smoothingFactor;
@@ -299,13 +266,9 @@ public:
         delete right;
     }
 
-    Node* getLeft() const { return left; }
-    Node* getRight() const { return right; }
-    double getSmoothingFactor() const { return smoothingFactor; }
-
     double Value(const Vector& point) const override;
 
-private:
+protected:
     Node* left;
     Node* right;
     double smoothingFactor;
@@ -321,16 +284,13 @@ public:
         delete right;
     }
 
-    Node* getLeft() const { return left; }
-    Node* getRight() const { return right; }
-    double getSmoothingFactor() const { return smoothingFactor; }
-
     double Value(const Vector& point) const override;
 
-private:
+protected:
     Node* left;
     Node* right;
     double smoothingFactor;
 };
 
-#endif // NODE_H
+
+#endif
