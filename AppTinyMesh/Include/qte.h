@@ -11,8 +11,7 @@ enum ID_Mesh
     ID_CUBE = 1,
     ID_CONE = 2,
     ID_TORE = 3,
-    ID_CAPSULE = 4,
-    ID_VISAGE = 5
+    ID_CAPSULE = 4
 };
 
 

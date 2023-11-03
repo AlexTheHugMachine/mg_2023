@@ -7,9 +7,13 @@
 
 using namespace std;
 
-int RX, RY, RZ;
+int RX, RY, RZ, compteurV;
 double scale_factorX, scale_factorY, scale_factorZ, TX, TY, TZ;
+double compteurDiff = 1;
+double xDiff, yDiff, zDiff;
 ID_Mesh id_m;
+Cube * cubeDiff;
+DifferenceSmooth * diff;
 
 MainWindow::MainWindow() : QMainWindow(), uiw(new Ui::Assets)
 {
@@ -109,9 +113,77 @@ void MainWindow::editingSceneRight(const Ray&)
 {
 }
 
-void MainWindow::editingErosion(const Ray &)
+void MainWindow::editingErosion(const Ray&)
 {
-    std::cout << "hello";
+    if(compteurV == 0)
+    {
+        Mesh implicitMesh;
+        cubeDiff = new Cube(Vector(0, 0, 0), Vector(5, 5, 5));
+        SDF sdf = SDF(cubeDiff);
+
+        sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+        std::vector<Color> cols;
+        cols.resize(implicitMesh.Vertexes());
+        for (size_t i = 0; i < cols.size(); i++)
+            cols[i] = Color(0.8, 0.8, 0.8);
+
+        meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+        UpdateGeometry();
+        compteurV++;
+    }
+    else
+    {
+        if(compteurV == 1)
+        {
+            Mesh implicitMesh;
+            Sphere * sphereDiff = new Sphere(Vector(2, 0, 0), compteurDiff);
+            diff = new DifferenceSmooth(cubeDiff, sphereDiff, 4.0);
+            SDF sdf(diff);
+            sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+            std::vector<Color> cols;
+            cols.resize(implicitMesh.Vertexes());
+            for (size_t i = 0; i < cols.size(); i++)
+                cols[i] = Color(0.8, 0.8, 0.8);
+
+            meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+            UpdateGeometry();
+            compteurDiff = compteurDiff-0.5;
+            compteurV++;
+            xDiff = 1;
+        }
+        else
+        {
+            Mesh implicitMesh;
+            Sphere * sphereDiff = new Sphere(Vector(xDiff, yDiff, zDiff), compteurDiff);
+            diff = new DifferenceSmooth(diff, sphereDiff, 4.0);
+            SDF sdf(diff);
+            sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+            std::vector<Color> cols;
+            cols.resize(implicitMesh.Vertexes());
+            for (size_t i = 0; i < cols.size(); i++)
+                cols[i] = Color(0.8, 0.8, 0.8);
+
+            meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+            UpdateGeometry();
+            if(compteurDiff>0)
+            {
+                compteurDiff = compteurDiff-0.2;
+                if(xDiff > -5)
+                    xDiff -=0.5;
+                else
+                    xDiff = -5;
+            }
+            else
+            {
+                compteurDiff = 1;
+            }
+
+        }
+    }
+
 }
 
 void MainWindow::BoxMeshExample()
