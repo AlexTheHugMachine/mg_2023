@@ -5,9 +5,6 @@
 #include "mathematics.h"
 #include <ray.h>
 
-/* ------------------------------------------ THE MAIN CLASSES ------------------------------------------ */
-
-// ========== Node ==========
 class Node
 {
 public:
@@ -17,10 +14,6 @@ public:
     virtual double Value(const Vector& point) const = 0;
 };
 
-
-/* ------------------------------------------- PRIMITIVES -------------------------------------------- */
-
-// ========== Sph�re ==========
 class Sphere : public Node
 {
 public:
@@ -35,7 +28,6 @@ protected:
     double radius;
 };
 
-// ========== Cube ==========
 class Cube : public Node
 {
 public:
@@ -51,7 +43,6 @@ protected:
     Vector sides;
 };
 
-// ========== C�ne ==========
 class Cone : public Node
 {
 public:
@@ -67,7 +58,6 @@ protected:
     double height;
 };
 
-// ========== Tore ==========
 class Tore : public Node
 {
 public:
@@ -82,7 +72,6 @@ protected:
     double largeCircleRadius;
 };
 
-// ========== Capsule ==========
 class Capsule : public Node
 {
 public:
@@ -98,7 +87,6 @@ protected:
     double radius;
 };
 
-// ========== Cylinder ==========
 class Cylinder : public Node
 {
 public:
@@ -115,10 +103,6 @@ protected:
     double height;
 };
 
-
-/* ---------------------------------------- TRANSFORMATIONS ----------------------------------------- */
-
-// ========== Translation ==========
 class Translation : public Node
 {
 public:
@@ -136,7 +120,6 @@ protected:
     Vector transformation;
 };
 
-// ========== Rotation ==========
 class Rotation : public Node
 {
 public:
@@ -154,7 +137,6 @@ protected:
     Vector transformation;
 };
 
-// ========== Scale ==========
 class Scale : public Node
 {
 public:
@@ -172,14 +154,6 @@ protected:
     Vector transformation;
 };
 
-
-/* ------------------------------------------- OPERATORS -------------------------------------------- */
-
-// ------------------------
-/* [ CLASSIC OPERATORS ] */
-// ------------------------
-
-// ========== Union ==========
 class Union : public Node
 {
 public:
@@ -197,7 +171,6 @@ protected:
     Node* right;
 };
 
-// ========== Intersection ==========
 class Intersection : public Node
 {
 public:
@@ -215,7 +188,6 @@ protected:
     Node* right;
 };
 
-// ========== Difference ==========
 class Difference : public Node
 {
 public:
@@ -233,12 +205,6 @@ protected:
     Node* right;
 };
 
-
-// -----------------------
-/* [ SMOOTH OPERATORS ] */
-// -----------------------
-
-// ========== Union smooth ==========
 class UnionSmooth : public Node
 {
 public:
@@ -256,7 +222,6 @@ protected:
     double smoothingFactor;
 };
 
-// ========== Intersection smooth ==========
 class IntersectionSmooth : public Node
 {
 public:
@@ -274,7 +239,6 @@ protected:
     double smoothingFactor;
 };
 
-// ========== Difference smooth ==========
 class DifferenceSmooth : public Node
 {
 public:
