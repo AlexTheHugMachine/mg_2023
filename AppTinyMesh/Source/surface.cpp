@@ -20,8 +20,6 @@ void Surface::Twist(float period)
     }
 }
 
-
-
 // bezier surface
 BezierSurface::BezierSurface(const std::vector<std::vector<Vector> > &control_points, unsigned int u, unsigned int v)
     : Surface(u, v), control_points_(control_points)
@@ -29,7 +27,7 @@ BezierSurface::BezierSurface(const std::vector<std::vector<Vector> > &control_po
     ComputePoints();
 }
 
-Mesh BezierSurface::BuildMesh() const
+Mesh BezierSurface::Polygonize() const
 {
     std::vector<Vector> vertices;
     std::vector<Vector> normals;
@@ -90,75 +88,6 @@ void BezierSurface::ComputePoints()
         }
 
         points_.push_back(row_points);
-        t += u_;
-    }
-}
-
-// revolution surface
-RevolutionSurface::RevolutionSurface(const std::vector<Vector> &control_points, unsigned int u, unsigned int v)
-    : Surface(u-1, v), control_points_(control_points)
-{
-    ComputePoints();
-}
-
-Mesh RevolutionSurface::BuildMesh() const
-{
-
-    std::vector<Vector> vertices;
-    std::vector<Vector> normals;
-    std::vector<int> vertex_indices;
-    std::vector<int> normal_indices;
-
-    for(unsigned int i = 0; i < points_.size(); ++i)
-    {
-        for(unsigned int j = 0; j < points_.at(i).size(); ++j)
-        {
-            vertices.push_back(points_.at(i).at(j));
-            normals.push_back(Vector(0.0, 1.0, 0.0));
-            unsigned int next = (j+1) % points_.at(i).size();
-            if(i < points_.size()-1)
-            {
-                vertex_indices.push_back(i*points_.at(i).size()+j);
-                vertex_indices.push_back(i*points_.at(i).size()+next);
-                vertex_indices.push_back((i+1)*points_.at(i).size()+next);
-
-                vertex_indices.push_back(i*points_.at(i).size()+j);
-                vertex_indices.push_back((i+1)*points_.at(i).size()+next);
-                vertex_indices.push_back((i+1)*points_.at(i).size()+j);
-
-                normal_indices.push_back(i*points_.at(i).size()+j);
-                normal_indices.push_back(i*points_.at(i).size()+next);
-                normal_indices.push_back((i+1)*points_.at(i).size()+next);
-
-                normal_indices.push_back(i*points_.at(i).size()+j);
-                normal_indices.push_back((i+1)*points_.at(i).size()+next);
-                normal_indices.push_back((i+1)*points_.at(i).size()+j);
-            }
-        }
-    }
-
-    Mesh mesh(vertices, normals, vertex_indices, normal_indices);
-    mesh.SmoothNormals();
-    return mesh;
-}
-
-void RevolutionSurface::ComputePoints()
-{
-    double t = 0.0;
-    double a = 2.0*3.14*v_;
-    double epsilon = 0.001;
-    while (t <= 1.0+epsilon)
-    {
-        Vector p = Bezier::DeCastledjau(control_points_, t);
-        // points around x-axis
-        std::vector<Vector> circle_points;
-        double theta = 0.0;
-        while(theta <= (2.0*3.14)-a)
-        {
-            circle_points.push_back(Vector(p[0], (cos(theta)*p[1])+(sin(theta)*p[2]), (-sin(theta)*p[1])+(cos(theta)*p[2])));
-            theta += a;
-        }
-        points_.push_back(circle_points);
         t += u_;
     }
 }

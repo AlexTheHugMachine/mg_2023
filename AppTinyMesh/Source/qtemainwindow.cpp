@@ -87,6 +87,12 @@ void MainWindow::CreateActions()
     connect(uiw->bezier_button, &QPushButton::clicked, [=]() {
         Bezier();
     });
+    connect(uiw->bezier_button_2, &QPushButton::clicked, [=]() {
+        Bezier_Twista();
+    });
+    connect(uiw->bezier_button_3, &QPushButton::clicked, [=]() {
+        Bezier_Twistb();
+    });
 
     connect(uiw->resetcameraButton, SIGNAL(clicked()), this, SLOT(ResetCamera()));
     connect(uiw->wireframe, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
@@ -847,37 +853,65 @@ void MainWindow::Bezier()
 {
     std::vector<std::vector<Vector>> control_points;
     std::vector<Vector> row_1;
-    row_1.push_back(Vector(-2.0, 0.0, -2.0));
-    row_1.push_back(Vector(-2.0, 0.0, 0.0));
-    row_1.push_back(Vector(-2.0, 0.0, 2.0));
-    std::vector<Vector> row_2;
-    row_2.push_back(Vector(0.0, 0.0, -2.0));
-    row_2.push_back(Vector(0.0, 0.0, 0.0));
-    row_2.push_back(Vector(0.0, 0.0, 2.0));
+    row_1.push_back(Vector(-2.0, -2.0, 0.0));
+    row_1.push_back(Vector(-2.0, 2.0, 0.0));
     std::vector<Vector> row_3;
-    row_3.push_back(Vector(2.0, 0.0, -2.0));
-    row_3.push_back(Vector(2.0, 0.0, 0.0));
-    row_3.push_back(Vector(2.0, 0.0, 2.0));
+    row_3.push_back(Vector(2.0, -2.0, 0.0));
+    row_3.push_back(Vector(2.0, 2.0, 0.0));
     control_points.push_back(row_1);
-    control_points.push_back(row_2);
     control_points.push_back(row_3);
     BezierSurface surface(control_points, 50, 50);
+    surface.Twist(15.0);
+    Mesh m = surface.Polygonize();
+
+    std::vector<Color> cols;
+    cols.resize(m.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(m, cols, m.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::Bezier_Twista()
+{
+    std::vector<std::vector<Vector>> control_points;
+    std::vector<Vector> row_1;
+    row_1.push_back(Vector(-2.0, -2.0, 0.0));
+    row_1.push_back(Vector(-2.0, 2.0, 0.0));
+    std::vector<Vector> row_3;
+    row_3.push_back(Vector(2.0, -2.0, 0.0));
+    row_3.push_back(Vector(2.0, 2.0, 0.0));
+    control_points.push_back(row_1);
+    control_points.push_back(row_3);
+    BezierSurface surface(control_points, 50, 50);
+    surface.Twist(6.0);
+    Mesh m = surface.Polygonize();
+
+    std::vector<Color> cols;
+    cols.resize(m.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(m, cols, m.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::Bezier_Twistb()
+{
+    std::vector<std::vector<Vector>> control_points;
+    std::vector<Vector> row_1;
+    row_1.push_back(Vector(-2.0, -2.0, 0.0));
+    row_1.push_back(Vector(-2.0, 2.0, 0.0));
+    std::vector<Vector> row_3;
+    row_3.push_back(Vector(2.0, -2.0, 0.0));
+    row_3.push_back(Vector(2.0, 2.0, 0.0));
+    control_points.push_back(row_1);
+    control_points.push_back(row_3);
+
+    BezierSurface surface(control_points, 50, 50);
     surface.Twist(2.0);
-    Mesh m = surface.BuildMesh();
-
-    /*
-    std::vector<Vector> control_points;
-    control_points.push_back(Vector(0.0, 0.0, 0.1));
-    control_points.push_back(Vector(0.2, 0.0, 0.7));
-    control_points.push_back(Vector(0.4, 0.0, 0.1));
-    control_points.push_back(Vector(0.6, 0.0, 0.7));
-    control_points.push_back(Vector(1.0, 0.0, 0.3));
-
-
-    RevolutionSurface surface(control_points, 50, 50);
-    //surface.Twist(2.0);
-    Mesh m = surface.BuildMesh();
-    */
+    Mesh m = surface.Polygonize();
 
     std::vector<Color> cols;
     cols.resize(m.Vertexes());

@@ -62,6 +62,8 @@ public slots:
     void ResetCamera();
     void UpdateMaterial();
     void Bezier();
+    void Bezier_Twista();
+    void Bezier_Twistb();
 private slots:
     void on_RotateXslider_valueChanged(int value);
     void on_RotateYslider_valueChanged(int value);
