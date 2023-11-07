@@ -24,9 +24,11 @@ SOURCES += \
     AppTinyMesh/Source/ray.cpp \
     AppTinyMesh/Source/shader-api.cpp \
     AppTinyMesh/Source/signed.cpp \
+    AppTinyMesh/Source/surface.cpp \
     AppTinyMesh/Source/triangle.cpp \
 
 HEADERS += \
+    AppTinyMesh/Include/bezier.h \
     AppTinyMesh/Include/box.h \
     AppTinyMesh/Include/camera.h \
     AppTinyMesh/Include/color.h \
@@ -40,7 +42,8 @@ HEADERS += \
     AppTinyMesh/Include/realtime.h \
     AppTinyMesh/Include/sdf.h \
     AppTinyMesh/Include/shader-api.h \
-    AppTinyMesh/Include/signed.h
+    AppTinyMesh/Include/signed.h \
+    AppTinyMesh/Include/surface.h
 
 FORMS += \
     AppTinyMesh/UI/interface.ui

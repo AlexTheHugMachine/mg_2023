@@ -61,6 +61,7 @@ public slots:
     void CompositionVisage();
     void ResetCamera();
     void UpdateMaterial();
+    void Bezier();
 private slots:
     void on_RotateXslider_valueChanged(int value);
     void on_RotateYslider_valueChanged(int value);
