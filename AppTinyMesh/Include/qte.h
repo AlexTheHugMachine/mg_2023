@@ -43,6 +43,7 @@ public slots:
     void editingSceneLeft(const Ray&);
     void editingSceneRight(const Ray&);
     void editingErosion(const Ray&);
+    void editingErosion(const Ray& ray, float size_sphere, int typeErosion = 1);
     void BoxMeshExample();
     void meshRotation();
     void meshScale();
@@ -59,6 +60,8 @@ public slots:
     void mixDifference();
     void mixDifferenceSmooth();
     void CompositionVisage();
+    void CompositionColonne();
+    void ColonneErosion();
     void ResetCamera();
     void UpdateMaterial();
     void Bezier();

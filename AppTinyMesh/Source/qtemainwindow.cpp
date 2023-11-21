@@ -4,6 +4,8 @@
 #include "sdf.h"
 #include "surface.h"
 #include <iostream>
+#include <chrono>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -14,6 +16,7 @@ double xDiff, yDiff, zDiff;
 ID_Mesh id_m;
 Cube * cubeDiff;
 DifferenceSmooth * diff;
+unsigned int nb_hits;
 
 MainWindow::MainWindow() : QMainWindow(), uiw(new Ui::Assets)
 {
@@ -84,6 +87,12 @@ void MainWindow::CreateActions()
         CompositionVisage();
         //id_m = ID_VISAGE;
     });
+    connect(uiw->colonne, &QPushButton::clicked, [=]() {
+        CompositionColonne();
+    });
+    connect(uiw->colonne_erosion, &QPushButton::clicked, [=]() {
+        ColonneErosion();
+    });
     connect(uiw->bezier_button, &QPushButton::clicked, [=]() {
         Bezier();
     });
@@ -124,6 +133,8 @@ void MainWindow::editingSceneRight(const Ray&)
 
 void MainWindow::editingErosion(const Ray& ray)
 {
+
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     double distance = 0.0;
 
     const unsigned int typeErosion = 1;
@@ -138,6 +149,7 @@ void MainWindow::editingErosion(const Ray& ray)
         {
             // �rosion incr�mentale
             unsigned int sphereSize = 0.6;
+            //unsigned int sphereSize = 0.9;
             currentNode = new DifferenceSmooth(currentNode, new Sphere(intersectionPoint, sphereSize), 1);
             sdf = Signed(currentNode);
         }
@@ -173,6 +185,68 @@ void MainWindow::editingErosion(const Ray& ray)
         meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
         UpdateGeometry();
     }
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    std::cout << "Temps éxecution erosion manuelle = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
+
+}
+
+void MainWindow::editingErosion(const Ray& ray, float size_sphere, int typeErosion)
+{
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    double distance = 0.0;
+
+    if (sdf.Intersect(ray, distance))
+    {
+        //std::cout << "Le rayon a touché le sdf !" << std::endl;
+        nb_hits++;
+
+        Mesh implicitMesh;
+
+        const Vector intersectionPoint = ray.Origin() + distance * ray.Direction();
+
+        if (typeErosion == 1)
+        {
+            // �rosion incr�mentale
+            unsigned int sphereSize = size_sphere;
+            currentNode = new DifferenceSmooth(currentNode, new Sphere(intersectionPoint, sphereSize), 1);
+            sdf = Signed(currentNode);
+        }
+        else if (typeErosion == 2)
+        {
+            // �rosion par paquets
+            constexpr unsigned int numSmallSpheres = 5;
+            double smallSphereSize = size_sphere / numSmallSpheres;
+            constexpr double circleRadius = 0.8;
+
+
+            currentNode = new DifferenceSmooth(currentNode, new Sphere(intersectionPoint, smallSphereSize), 1);
+
+            for (int i = 0; i < numSmallSpheres; i++)
+            {
+                double angle = (2 * M_PI * i) / numSmallSpheres;
+                double xOffset = circleRadius * cos(angle);
+                double zOffset = circleRadius * sin(angle);
+
+                currentNode = new DifferenceSmooth(currentNode, new Sphere(intersectionPoint + Vector(xOffset, 0, zOffset), smallSphereSize), 1);
+            }
+
+            sdf = Signed(currentNode);
+
+        }
+
+        sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+        vector<Color> cols;
+        cols.resize(implicitMesh.Vertexes());
+        for (size_t i = 0; i < cols.size(); i++)
+            cols[i] = Color(0.8, 0.8, 0.8);
+
+        meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+        UpdateGeometry();
+    }
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    //std::cout << "Temps éxecution erosion manuelle = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
+
 }
 
 void MainWindow::BoxMeshExample()
@@ -797,6 +871,7 @@ void MainWindow::mixDifferenceSmooth()
 
 void MainWindow::CompositionVisage()
 {
+    std::chrono::steady_clock::time_point begin_toilettes = std::chrono::steady_clock::now();
     Mesh implicitMesh;
 
     const double smoothFactor = 4;
@@ -847,6 +922,149 @@ void MainWindow::CompositionVisage()
 
     meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
     UpdateGeometry();
+    std::chrono::steady_clock::time_point end_toilettes = std::chrono::steady_clock::now();
+    std::cout << "Temps éxecution CompositionToilettes() = " << std::chrono::duration_cast<std::chrono::milliseconds>(end_toilettes - begin_toilettes).count() << "[ms]" << std::endl;
+
+}
+
+void MainWindow::CompositionColonne() {
+
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
+    Mesh implicitMesh;
+
+    const double smoothFactor = 1;
+    int nb_reinures = 8;
+
+    float radius_colonne = 1.5;
+    float hauteur_colonne = 8.0;
+
+    float step = (2 * M_PI) / nb_reinures;
+    Cylinder * corps_colonne = new Cylinder(Vector(0.0, 0.0, 0.0), radius_colonne, hauteur_colonne);
+    Cylinder * vide = new Cylinder(Vector(0.0, 0.0, 0.0), 0.0, 0.0);
+
+    UnionSmooth * interReinures = new UnionSmooth(corps_colonne, vide, smoothFactor);
+    for(int i = 0; i < nb_reinures; i++){
+        float alpha = step * i;
+        float x = radius_colonne * cos(alpha);
+        float z = radius_colonne * sin(alpha);
+
+        Cylinder * cylindreReinures = new Cylinder(Vector(x, 0, z), 0.4, hauteur_colonne);
+        interReinures = new UnionSmooth(interReinures, cylindreReinures, smoothFactor);
+    }
+    float largeur_socle = (radius_colonne * 2) * 1.5;
+    Cube * socle = new Cube(Vector(0, 0, 0), Vector(largeur_socle, hauteur_colonne / 8, largeur_socle));
+    Cylinder * rebord_socle = new Cylinder(Vector(0.0, 0.0, 0.0), 0.2, largeur_socle);
+
+    Rotation * rotation_rebord = new Rotation(rebord_socle, Vector(0.0, 0.0, 90.0));
+    Translation * pos_rebord = new Translation(rotation_rebord, Vector(0.0, -hauteur_colonne / 16, -largeur_socle/2));
+    UnionSmooth * colonne_it = new UnionSmooth(socle, pos_rebord, smoothFactor);
+    rotation_rebord = new Rotation(pos_rebord, Vector(0.0, 0.0, 0.0));
+
+    for(int j =0; j < 4; j++){
+        rotation_rebord = new Rotation(rotation_rebord, Vector(0.0, 90.0, 0.0));
+        colonne_it = new UnionSmooth(colonne_it, rotation_rebord, smoothFactor);
+    }
+
+    Translation * descendSocle = new Translation(colonne_it, Vector(0.0,-4.0, 0.0));
+    UnionSmooth * final1 = new UnionSmooth(interReinures, descendSocle, smoothFactor);
+
+    float largeur_sommet = (radius_colonne * 2) * 1.7;
+    Cube * sommet = new Cube(Vector(0, 0, 0), Vector(largeur_socle, hauteur_colonne / 6, largeur_socle));
+    Cylinder * rebord_sommet_union = new Cylinder(Vector(0.0, 0.0, 0.0), 0.2, largeur_socle);
+    Cylinder * rebord_sommet_diff = new Cylinder(Vector(0.0, 0.0, 0.0), 0.2, largeur_socle);
+
+    Rotation * rotation_sommet_union = new Rotation(rebord_sommet_union, Vector(0.0, 0.0, 90.0));
+    Translation * pos_sommet_union = new Translation(rotation_sommet_union, Vector(0.0, -hauteur_colonne / 12, -largeur_socle/2));
+    UnionSmooth * sommet_union = new UnionSmooth(sommet, pos_sommet_union, smoothFactor);
+
+    Rotation * rotation_sommet_diff = new Rotation(rebord_sommet_diff, Vector(0.0, 0.0, 90.0));
+    Translation * pos_sommet_diff = new Translation(rotation_sommet_diff, Vector(0.0, -hauteur_colonne / 12, -largeur_socle/2));
+    DifferenceSmooth * sommet_diff = new DifferenceSmooth(sommet_union, pos_sommet_diff, smoothFactor);
+
+    rotation_sommet_union = new Rotation(pos_sommet_union, Vector(0.0, 0.0, 0.0));
+    rotation_sommet_diff = new Rotation(pos_sommet_diff, Vector(0.0, 0.0, 0.0));
+
+    for(int j =0; j < 4; j++){
+        rotation_sommet_union = new Rotation(rotation_sommet_union, Vector(0.0, 90.0, 0.0));
+        sommet_union = new UnionSmooth(sommet_diff, rotation_sommet_union, smoothFactor);
+
+        rotation_sommet_diff = new Rotation(rotation_sommet_diff, Vector(0.0, 90.0, 0.0));
+        sommet_diff = new DifferenceSmooth(sommet_union, rotation_sommet_diff, smoothFactor);
+    }
+
+    Translation * monte_sommet = new Translation(sommet_diff, Vector(0.0, 4.3, 0.0));
+    UnionSmooth * final = new UnionSmooth(final1, monte_sommet, smoothFactor);
+
+    currentNode = new Rotation(final, Vector(0, 0, 0));
+
+    sdf = Signed(currentNode);
+    sdf.Polygonize(50, implicitMesh, Box(5.0));
+
+    std::vector<Color> cols;
+    cols.resize(implicitMesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+
+
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    std::cout << "Temps éxecution CompositionColonne() = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
+
+}
+
+void MainWindow::ColonneErosion(){
+    std::chrono::steady_clock::time_point begin_erosion = std::chrono::steady_clock::now();
+    // On construit en premier la colonne
+    CompositionColonne();
+
+    nb_hits = 0;
+    // On crée un certain nombre de rayons qui vont éroder notre colonne
+    // On part du principe qu'ils suivent une direction globale (et ne peuvent dévier que selon un angle (exemple érosion due aux vent/ marées)
+
+    //int nb_spheres = 20;
+    int nb_spheres = 20;
+
+
+    // origine sera la même pour tous les rayons
+    Vector origine1 = Vector(-12.0, 10.0, 2.0);
+    Vector sommet_colonne = Vector(0.0,4.0*1.15, 0.0);
+    Vector direction = Normalized(sommet_colonne - origine1);
+
+    Ray ray = Ray(origine1, Normalized(direction));
+
+    std::vector<Ray> rayons;
+    std::vector<int> tailles_sphere;
+
+    rayons.push_back(ray);
+    tailles_sphere.push_back(2.0);
+
+    for(int u =0; u < nb_spheres; u++){
+        //srand((unsigned)time(NULL));
+        float random_x = (rand() % 101 - 50) / 10.0;
+        float random_y = (rand() % 101 - 50) / 10.0;
+        float random_z = (rand() % 101 - 50) / 10.0;
+        Vector origine = Vector(random_x, random_y, random_z);
+        Vector new_dir = Normalized(Vector(Vector(0.0, 0.0, 0.0) - origine));
+        Ray new_ray = Ray(origine, new_dir);
+        rayons.push_back(new_ray);
+        float proba = (rand() % 6 + 4) / 10.0;
+        float sphere_size = 1.5 * proba;
+        tailles_sphere.push_back(sphere_size);
+    }
+
+    for(int r = 0; r < rayons.size(); r++) {
+        Ray rayon = rayons[r];
+        std::cout << "Rayon actuel : origine(" << rayon.Origin() << ")   et   direction(" << rayon.Direction() << ")" << std::endl;
+        int size = tailles_sphere[r];
+        editingErosion(rayon, size, 1);
+    }
+
+    std::chrono::steady_clock::time_point end_erosion = std::chrono::steady_clock::now();
+    std::cout << "Temps execution ColonneErosion() = " << std::chrono::duration_cast<std::chrono::milliseconds> (end_erosion - begin_erosion).count() << "[ms]" << std::endl;
+    std::cout << " Sur " << nb_spheres << " lancés : " << nb_hits << " ont touché le sdf !" << std::endl;
 }
 
 void MainWindow::Bezier()

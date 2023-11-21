@@ -118,7 +118,7 @@ void Mesh::AddTriangle(int a, int b, int c, int n)
 }
 
 /*!
-\brief Add a smmoth quadrangle to the geometry.
+\brief Add a smooth quadrangle to the geometry.
 
 Creates two smooth triangles abc and acd.
 
